@@ -12,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +52,7 @@ public class VoiceChatBroadcastPlugin implements VoicechatPlugin {
         }
 
         // Get the minecraft server instance
-        MinecraftServer server = VoiceChatBroadcast.minecraftServer;
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         // Get an instance of LuckPerms
         LuckPerms luckperms = LuckPermsProvider.get();
 
@@ -79,11 +80,11 @@ public class VoiceChatBroadcastPlugin implements VoicechatPlugin {
 
         // Check if the user has the broadcast permission. If not, tell them and quit broadcast.
         if (!(user.getCachedData().getPermissionData().checkPermission("voicechat.broadcast").asBoolean())) {
-            player.sendMessage(new TextComponent(ChatFormatting.RED + "You do not have permission to broadcast."), playerUUID);
+            player.displayClientMessage(new TextComponent(ChatFormatting.RED + "You do not have permission to broadcast."), true);
             return;
         }
 
-        player.displayClientMessage(new TextComponent("You are Broadcasting to the Server!"), true);
+        player.displayClientMessage(new TextComponent(ChatFormatting.GREEN + "⚑ You are broadcasting to the server!"), true);
 
         VoicechatServerApi api = event.getVoicechat();
 
@@ -97,21 +98,19 @@ public class VoiceChatBroadcastPlugin implements VoicechatPlugin {
                 continue;
             }
 
-            // Get the voicechat connection of the player
             VoicechatConnection connection = api.getConnectionOf(players.getUUID());
 
-            // Cancel the packet if there is no connection for the player
             if (connection == null)
             {
                 continue;
             }
 
-            // Create static sound packet
             StaticSoundPacket convertedPacket;
             convertedPacket = createStaticSoundPacket(event.getPacket());
 
-            // Send the static sound packet out to the connection
             api.sendStaticSoundPacketTo(connection, convertedPacket);
+
+            players.displayClientMessage(new TextComponent(ChatFormatting.GRAY + "⚑ You are receiving a radio-based broadcast..."), true);
         }
 
     }
