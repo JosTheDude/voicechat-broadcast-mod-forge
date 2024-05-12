@@ -69,8 +69,9 @@ public class VoiceChatBroadcastPlugin implements VoicechatPlugin {
         event.cancel();
 
         // Get UUID of player talking
-        ServerPlayer player = (net.minecraft.server.level.ServerPlayer) event.getSenderConnection().getPlayer();
         UUID playerUUID = event.getSenderConnection().getPlayer().getUuid();
+
+        ServerPlayer player = server.getPlayerList().getPlayer(playerUUID);
 
         if (player == null) {
             return;
